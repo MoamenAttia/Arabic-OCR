@@ -42,7 +42,10 @@ class WordSegmentor:
         return words
 
     def segment_words(self):
+        line_words = []
         for line_idx, line in enumerate(self.__lines):
             words = self.__segment_line(line)
-            for idx, word in enumerate(words):
-                cv2.imwrite(f'line{line_idx}-word{idx}.png', word)
+            line_words.append((line, words))
+        return line_words 
+            # for idx, word in enumerate(words):
+            #     cv2.imwrite(f'line{line_idx}-word{idx}.png', word)

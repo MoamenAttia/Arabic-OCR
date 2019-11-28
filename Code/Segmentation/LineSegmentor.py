@@ -3,7 +3,6 @@ import numpy as np
 
 
 class LineSegmentor:
-
     def __init__(self, img, threshold=0):
         """
         Takes an image of the line.
