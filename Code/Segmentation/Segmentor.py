@@ -14,8 +14,18 @@ class Segmentor:
         for idx, line in enumerate(lines):
             cv2.imwrite(f'lines/line{idx}.png', line)
 
+    def __print_words(self, line_words):
+        count = 0
+        for item in line_words:
+            for _, word in enumerate(item[1]):
+                cv2.imwrite(f'words/word{count}.png', word)
+                count += 1
+
+
     def run_segmentor(self):
         lines = LineSegmentor(self.__gray_image).segment_lines()
-        self.__print_lines(lines)
         line_words = WordSegmentor(lines).segment_words()
-        CharSegmentor(line_words).segment_chars()
+        print(f"lines count {len(line_words)}")
+
+        self.__print_words(line_words)
+        # CharSegmentor(line_words).segment_chars()

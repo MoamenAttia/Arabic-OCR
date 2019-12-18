@@ -6,9 +6,10 @@ import re
 from Line_segmentation import segment_paragragh
 
 
-img = 'C:\\Users\\Topit\\Documents\\GitHub\\Arabic-Char-Segmentation\\dataset\\scanned'
-txt = 'C:\\Users\\Topit\\Documents\\GitHub\\Arabic-Char-Segmentation\\dataset\\text'
-results_path = 'C:\\Users\\Topit\\Documents\\GitHub\\Arabic-Char-Segmentation\\dataset\\results'
+img = '../scanned'
+txt = '../text'
+
+results_path = 'results'
 
 
 def get_char(text_file):
@@ -37,7 +38,7 @@ def prepare_dataset(imgs, chars):
         else:
             j += 1  # skip it.
             count += 1
-
+            
     print('no. of errors= ', count)
     return data
 
@@ -49,13 +50,13 @@ def save_data(data, img):
                'laamalif']
 
     letters = ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق',
-               'ك', 'ل', 'م', 'ن', 'ه', 'و','ي','لا']
+               'ك', 'ل', 'م', 'ن', 'ه', 'و','ى','لا']
 
     cnt = 0
     for el in data:
         if el[1] in letters:  # :P
             cnt = letters.index(el[1])
-            path = results_path + '\\' + folders[cnt]
+            path = results_path + '/' + folders[cnt]
             print(path)
             os.chdir(path)
             idx = len(glob.glob(os.path.join(path, '*.png')))

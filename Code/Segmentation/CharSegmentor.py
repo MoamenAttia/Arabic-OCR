@@ -44,4 +44,3 @@ class CharSegmentor:
         for line, words in self.__line_words:
             baseline = self.__detect_baseline(line)
             max_transition_line = self.__detect_maximum_transition_line(line, baseline)
-            print(max_transition_line, baseline)

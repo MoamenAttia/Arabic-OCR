@@ -30,7 +30,6 @@ class WordSegmentor:
 
     def __segment_line(self, line):
         gaps = self.__find_gaps(line)
-        print(gaps)
         words = []
         for i in range(0, len(gaps) - 1):
             words.append(line[::, gaps[i][1]:gaps[i+1][0]])
