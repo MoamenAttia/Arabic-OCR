@@ -7,14 +7,14 @@ import skimage.graph
 def get_path_cost(skeleton, img, mti, s, t):
     for i in range(img.shape[0]):
         for j in range(img.shape[1]):
-            if img[i,j] == 255:
-                skeleton[i,j] = True
+            if img[i, j] == 255:
+                skeleton[i, j] = True
             else:
-                skeleton[i,j] = False
+                skeleton[i, j] = False
     array = np.asarray(skeleton)
-    costs = np.where(array, 0.1,1000000000000000000 )
+    costs = np.where(array, 0.1, 1000000000000000000)
     path, cost = skimage.graph.route_through_array(
-        costs, start=(mti, s -1), end=(mti, t), fully_connected=True)
+        costs, start=(mti, s - 1), end=(mti, t), fully_connected=True)
 
     return cost
 
@@ -23,6 +23,7 @@ def horizintal_projection(im):
     #im = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     projection = np.sum(im, 1)  # Calculate horizontal projection
     return projection
+
 
 def vertical_projection(im):
     projection = np.sum(im, 0)
@@ -38,11 +39,11 @@ def get_heighest_pixel_index(hp):
     return i
 
 
-def holeExist(word,boundaries, mti):
+def holeExist(word, boundaries, mti):
     img = word[0:mti, 0:word.shape[1]]
     vp_img = vertical_projection(img)
 
-    for i in range(boundaries[1],boundaries[0]):
+    for i in range(boundaries[1], boundaries[0]):
         if vp_img[i] == 0:
             return False
     return True
@@ -50,7 +51,7 @@ def holeExist(word,boundaries, mti):
 
 def baselineExist(word, boundaries, bl):
     count = 0
-    for i in range(boundaries[1],boundaries[3]):
+    for i in range(boundaries[1], boundaries[3]):
         if word[bl, i] == 0:
             # count += 1
             return False
@@ -58,11 +59,13 @@ def baselineExist(word, boundaries, bl):
     #     return False
     return True
 
+
 def get_SHP(word, boundaries, start, end):
     img = word[start:end, boundaries[1]:boundaries[0]]
     # cv2.imwrite('zmzm.png', img)
     hp_img = horizintal_projection(img)
     return np.sum(hp_img)
+
 
 def get_highest_left_pixel(word, boundaries1, boundaries2):
     img = word[0:word.shape[0], boundaries2[3]:boundaries1[3]]
@@ -95,7 +98,6 @@ def components_count(img, bl):
     return count
 
 
-
 def get_stroke_cropping_indeces(hp, bl):
     start = 0
     i = bl
@@ -107,18 +109,21 @@ def get_stroke_cropping_indeces(hp, bl):
 
     end = len(hp) - 1
     i = bl
-    while i <len(hp):
+    while i < len(hp):
         if hp[i] == 0:
             end = i
             break
         i += 1
     return start, end
 
+
 def remove_values_from_list(the_list, val):
-   return [value for value in the_list if value != val]
+    return [value for value in the_list if value != val]
 
 # check stroke conditions according to the paper
 # get baseLine
+
+
 def isStroke(word, boundaries1, boundaries2, bl, top_pixel_in_word_index, mfv, mfv1, mti, second, skeleton, vp):
     img = word[0:word.shape[0], boundaries1[3]:boundaries2[3]]
     start, end = get_stroke_cropping_indeces(horizintal_projection(img), bl)
@@ -127,14 +132,13 @@ def isStroke(word, boundaries1, boundaries2, bl, top_pixel_in_word_index, mfv, m
     # word[bl, 0:word.shape[1]] = 255
     # cv2.imwrite('zfttttt.png', img1)
 
-
     # cond1: single component
     if components_count(img, int(word.shape[0]/2)) > 1:
         #print('cond1 checked')
         return False
 
     # cond2: SHPA > SHPB
-    if get_SHP(img1,[img1.shape[1], 0], 0, bl) <= get_SHP(img1, [img1.shape[1], 0], bl, img1.shape[0]):
+    if get_SHP(img1, [img1.shape[1], 0], 0, bl) <= get_SHP(img1, [img1.shape[1], 0], bl, img1.shape[0]):
         #print('cond2 checked', get_SHP(img,[img.shape[1], 0], 0, bl), get_SHP(img, [img.shape[1], 0], bl, img.shape[0]))
         return False
 
@@ -173,7 +177,7 @@ def isStroke(word, boundaries1, boundaries2, bl, top_pixel_in_word_index, mfv, m
         return False
 
     # cond5:
-    if (holeExist(img, [img.shape[1], 0], mti) and not dotsExist(word,boundaries1,boundaries2)) or holeExist(word, boundaries1, mti) or get_path_cost(skeleton, word, mti, boundaries1[1], boundaries1[0]) > 1000000000000000000 or vp[boundaries1[3]] == 0:
+    if (holeExist(img, [img.shape[1], 0], mti) and not dotsExist(word, boundaries1, boundaries2)) or holeExist(word, boundaries1, mti) or get_path_cost(skeleton, word, mti, boundaries1[1], boundaries1[0]) > 1000000000000000000 or vp[boundaries1[3]] == 0:
         #print('cond5 checked')
         return False
     # cv2.imwrite('zfttt.png', img1)
@@ -184,7 +188,7 @@ def isStroke(word, boundaries1, boundaries2, bl, top_pixel_in_word_index, mfv, m
 def dotsExist(word, boundaries1, boundaries2):
     img = word[0:word.shape[0], boundaries1[3] + 2:boundaries2[3] - 2]
     hp_img = horizintal_projection(img)
-    cv2.imwrite('zfttttt.png', img)
+    #cv2.imwrite('zfttttt.png', img)
 
     count = 0
     flag = 0
@@ -201,8 +205,7 @@ def dotsExist(word, boundaries1, boundaries2):
 
 
 def remove_values_from_list(the_list, val):
-   return [value for value in the_list if value != val]
-
+    return [value for value in the_list if value != val]
 
 
 def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most_frequent_value, most_frequent_value_after_0, vp, hp, second):
@@ -210,14 +213,15 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
     i = 0
     # top_pixel_in_word_index = get_heighest_pixel_index(hp)
 
-    sr.append([word.shape[1] - 1, word.shape[1] - 1, word.shape[1] - 1, word.shape[1] - 1])
-    valid_sr=[]
+    sr.append([word.shape[1] - 1, word.shape[1] - 1,
+               word.shape[1] - 1, word.shape[1] - 1])
+    valid_sr = []
     top_pixel_in_word_index = get_heighest_pixel_index(hp)
     sr.reverse()
 
     if i < len(sr) - 1 and isStroke(word, sr[i + 1], sr[i], baseLine, top_pixel_in_word_index, most_frequent_value,
-                                      most_frequent_value_after_0, maxTransitionIndex, second, skeleton,
-                                      vp) and not dotsExist(word, sr[i + 1], sr[i]):
+                                    most_frequent_value_after_0, maxTransitionIndex, second, skeleton,
+                                    vp) and not dotsExist(word, sr[i + 1], sr[i]):
         #print('seen case', i)
         if i < len(sr) - 2 and isStroke(word, sr[i + 2], sr[i + 1], baseLine, top_pixel_in_word_index,
                                         most_frequent_value,
@@ -238,20 +242,21 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
                                                                                                      maxTransitionIndex,
                                                                                                      second, skeleton,
                                                                                                      vp) and not dotsExist(
-            word, sr[i + 3], sr[i + 2]):
+                word, sr[i + 3], sr[i + 2]):
             #print('add sheen 2', i)
             valid_sr.append(sr[i])
             i += 3
 
         else:
-            #print('check')
+            # print('check')
             i += 1
 
-    #print(i)
+    # print(i)
 
     valid_sr.append(sr[0])
     while i < len(sr) - 1:
-        cost = get_path_cost(skeleton, word, maxTransitionIndex, sr[i][1], sr[i][0])
+        cost = get_path_cost(
+            skeleton, word, maxTransitionIndex, sr[i][1], sr[i][0])
 
         # general case
         if vp[sr[i][3]] == 0:
@@ -281,11 +286,11 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
                                                                                                              second,
                                                                                                              skeleton,
                                                                                                              vp) and not dotsExist(
-                    word, sr[i + 3], sr[i + 2]):
+                        word, sr[i + 3], sr[i + 2]):
                     #print('add sheen 2', i)
                     valid_sr.append(sr[i])
                     i += 3
-                elif get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) < maxTransitionIndex -5:
+                elif get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) < maxTransitionIndex - 5:
                     #print('normal, not seen but add ',i)
                     valid_sr.append(sr[i])
                     i += 1
@@ -325,11 +330,11 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
                                                                                                              second,
                                                                                                              skeleton,
                                                                                                              vp) and not dotsExist(
-                    word, sr[i + 3], sr[i + 2]):
+                        word, sr[i + 3], sr[i + 2]):
                     #print('add sheen 2', i)
                     valid_sr.append(sr[i])
                     i += 3
-                elif get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) < maxTransitionIndex -5:
+                elif get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) < maxTransitionIndex - 5:
                     valid_sr.append(sr[i])
                     #print('no path, not seen but add ',i)
                     i += 1
@@ -344,7 +349,7 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
                 i += 1
 
         # detect holes case like: "ص, ض, ف, ه, ط"
-        elif holeExist(word,sr[i],maxTransitionIndex):
+        elif holeExist(word, sr[i], maxTransitionIndex):
             #print('hole detected ', i)
             i += 1
 
@@ -364,19 +369,17 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
                 #print(most_frequent_value, vp[sr[i][3]])
                 i += 1
 
-
         # might need to change operator
-        elif (vp[sr[i + 1][3]] == 0 or i == len(sr) - 2) and (-get_highest_left_pixel(word, sr[i],sr[i + 1]) + baseLine) < int((-top_pixel_in_word_index + baseLine)/2)\
+        elif (vp[sr[i + 1][3]] == 0 or i == len(sr) - 2) and (-get_highest_left_pixel(word, sr[i], sr[i + 1]) + baseLine) < int((-top_pixel_in_word_index + baseLine)/2)\
                 and get_path_cost(skeleton, word, maxTransitionIndex, sr[i][1], sr[i][0]) < 1000000000 and vp[sr[i+1][3]] != 0:
             #print(most_frequent_value/255, vp[sr[i][3]]/255, 'skip1', i, get_highest_left_pixel(word, sr[i],sr[i + 1]), top_pixel_in_word_index, baseLine)
             i += 1
 
-
         elif i < len(sr) - 1 and not isStroke(word, sr[i + 1], sr[i], baseLine, top_pixel_in_word_index, most_frequent_value, most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp):
             #print('not stroke', i, vp[sr[i + 1][3]], most_frequent_value, baselineExist(word, sr[i + 1], baseLine), len(sr))
             if (i != len(sr) - 2 and (vp[sr[i+1][3]] == 0 or get_path_cost(skeleton, word, maxTransitionIndex, sr[i+1][1], sr[i+1][0]) > 1000000000000000000
-            or not baselineExist(word, sr[i + 1], baseLine) and get_SHP(word, sr[i+1], baseLine, word.shape[0]) > get_SHP(word, sr[i+1], 0, baseLine)) and top_pixel_in_word_index + 16 >= get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])))\
-                    or (i == len(sr)-2 and top_pixel_in_word_index + 12 >= get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) and holeExist(word,[sr[i][3], sr[i+1][3]],maxTransitionIndex))\
+                                      or not baselineExist(word, sr[i + 1], baseLine) and get_SHP(word, sr[i+1], baseLine, word.shape[0]) > get_SHP(word, sr[i+1], 0, baseLine)) and top_pixel_in_word_index + 16 >= get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])))\
+                    or (i == len(sr)-2 and top_pixel_in_word_index + 12 >= get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) and holeExist(word, [sr[i][3], sr[i+1][3]], maxTransitionIndex))\
                     or (i == len(sr) - 2 and top_pixel_in_word_index + 2 >= get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i + 1][3]:sr[i][3]]))):
                 valid_sr.append(sr[i])
                 i += 1
@@ -384,7 +387,8 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
             elif (top_pixel_in_word_index != get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) and (vp[sr[i+1][3]] == 0 or cost > 1000000000000000000)) \
                     or (top_pixel_in_word_index != get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][0]:sr[i+1][1]]))and vp[sr[i+1][3]] == 0 and i + 1 == len(sr) - 1) or \
                     (not baselineExist(word, sr[i + 1], baseLine) and vp[sr[i + 1][3]] < most_frequent_value and vp[sr[i+1][3]] != 0 and get_path_cost(skeleton, word, maxTransitionIndex, sr[i+1][1], sr[i+1][0]) < 1000000000000000000):
-                print('not stroke, dont add it', i, baselineExist(word, sr[i + 1], baseLine), vp[sr[i + 1][3]], most_frequent_value)
+                print('not stroke, dont add it', i, baselineExist(
+                    word, sr[i + 1], baseLine), vp[sr[i + 1][3]], most_frequent_value)
                 i += 1
             else:
                 #print('not stroke, add it', i)
@@ -392,29 +396,29 @@ def filter_cutting_points(skeleton, word, sr, baseLine, maxTransitionIndex, most
                 i += 1
 
         elif i < len(sr) - 1 and isStroke(word, sr[i + 1], sr[i], baseLine, top_pixel_in_word_index, most_frequent_value,
-                            most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and dotsExist(word, sr[i + 1], sr[i]):
+                                          most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and dotsExist(word, sr[i + 1], sr[i]):
             #print('is a stroke with dots', i)
             valid_sr.append(sr[i])
             i += 1
 
         elif i < len(sr) - 1 and isStroke(word, sr[i + 1], sr[i], baseLine, top_pixel_in_word_index, most_frequent_value,
-                            most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and not dotsExist(word, sr[i + 1], sr[i]):
+                                          most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and not dotsExist(word, sr[i + 1], sr[i]):
             #print('seen case', i)
             if i < len(sr) - 2 and isStroke(word, sr[i + 2], sr[i + 1], baseLine, top_pixel_in_word_index, most_frequent_value,
-                            most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and not dotsExist(word, sr[i + 2], sr[i + 1]):
+                                            most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and not dotsExist(word, sr[i + 2], sr[i + 1]):
                 #print('add seen 1', i)
                 valid_sr.append(sr[i])
                 i += 3
             elif i < len(sr) - 3 and isStroke(word, sr[i + 2], sr[i + 1], baseLine, top_pixel_in_word_index, most_frequent_value,
-                            most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and dotsExist(word, sr[i + 2], sr[i + 1])and isStroke(word, sr[i + 3], sr[i + 2], baseLine, top_pixel_in_word_index, most_frequent_value,
-                            most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and not dotsExist(word, sr[i + 3], sr[i + 2]):
+                                              most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and dotsExist(word, sr[i + 2], sr[i + 1])and isStroke(word, sr[i + 3], sr[i + 2], baseLine, top_pixel_in_word_index, most_frequent_value,
+                                                                                                                                                                           most_frequent_value_after_0, maxTransitionIndex, second, skeleton, vp) and not dotsExist(word, sr[i + 3], sr[i + 2]):
                 #print('add seen 2', i)
                 valid_sr.append(sr[i])
                 i += 3
 
             elif i < len(sr) - 2 and get_heighest_pixel_index(horizintal_projection(word[0:word.shape[0], sr[i+1][3]:sr[i][3]])) < maxTransitionIndex - 5 \
-                    and get_heighest_pixel_index(
-                horizintal_projection(word[0:word.shape[0], sr[i + 2][3]:sr[i + 1][3]])) > maxTransitionIndex - 2:
+                and get_heighest_pixel_index(
+                    horizintal_projection(word[0:word.shape[0], sr[i + 2][3]:sr[i + 1][3]])) > maxTransitionIndex - 2:
                 #print('seen invented', i)
                 valid_sr.append(sr[i])
                 i += 1
