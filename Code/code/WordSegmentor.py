@@ -51,9 +51,4 @@ class WordSegmentor:
             length += len(words)
             line_words.append(words)
 
-            #for idx, word in enumerate(words):
-            #    cv2.imwrite(f'line{line_idx}-word{idx}.png', word)
-            #cv2.imwrite(f'line{line_idx}.png', line)
-
         return line_words, length
-

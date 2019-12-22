@@ -3,47 +3,44 @@ import numpy as np
 import os
 import glob
 import re
-from Line_segmentation import segment_paragragh
 from WordSegmentor import WordSegmentor
 from LineSegmentor import LineSegmentor
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.models import model_from_json
-import cv2
-import os
-import numpy as np
-from math import copysign, log10
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
-from sklearn.naive_bayes import GaussianNB
-from pyefd import elliptic_fourier_descriptors
-from sklearn.preprocessing import StandardScaler
-import imutils
-from sklearn import preprocessing
-from numpy import loadtxt
-from keras.models import Sequential
-from keras.layers import Dense
-import pandas
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasClassifier
-from keras.utils import np_utils
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import Pipeline
-from numpy import array
-from numpy import argmax
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import OneHotEncoder
-from keras.models import model_from_json
-from tempfile import TemporaryFile
-from padding import pad
+from new import segment_chars
+# from keras.layers import Dense
+# from keras.models import Sequential
+# from keras.models import model_from_json
+# from math import copysign, log10
+# import pandas as pd
+# from sklearn.model_selection import train_test_split
+# from sklearn.svm import SVC
+# from sklearn.metrics import accuracy_score
+# from sklearn.naive_bayes import GaussianNB
+# from pyefd import elliptic_fourier_descriptors
+# from sklearn.preprocessing import StandardScaler
+# import imutils
+# from sklearn import preprocessing
+# from numpy import loadtxt
+# from keras.models import Sequential
+# from keras.layers import Dense
+# import pandas
+# from keras.models import Sequential
+# from keras.layers import Dense
+# from keras.wrappers.scikit_learn import KerasClassifier
+# from keras.utils import np_utils
+# from sklearn.model_selection import cross_val_score
+# from sklearn.model_selection import KFold
+# from sklearn.preprocessing import LabelEncoder
+# from sklearn.pipeline import Pipeline
+# from numpy import array
+# from numpy import argmax
+# from sklearn.preprocessing import LabelEncoder
+# from sklearn.preprocessing import OneHotEncoder
+# from keras.models import model_from_json
+# from tempfile import TemporaryFile
+# from padding import pad
 
 
-input_path = 'C:/Users\medo\Desktop\Arabic-OCR\Code\input'
+input_path = '..\input'
 
 numbers = re.compile(r'(\d+)')
 
@@ -138,46 +135,50 @@ final_labels = {'alif': 'ا',
 
 # load labels
 
-Y = np.genfromtxt(
-    'C:/Users\medo\Desktop\Arabic-OCR\Code\code\labels.txt', dtype='str')
-encoder = LabelEncoder()
-encoder.fit(Y)
-encoded_Y = encoder.transform(Y)
-dummy_y = np_utils.to_categorical(encoded_Y)
+# Y = np.genfromtxt(
+#     'C:/Users\medo\Desktop\Arabic-OCR\Code\code\labels.txt', dtype='str')
+# encoder = LabelEncoder()
+# encoder.fit(Y)
+# encoded_Y = encoder.transform(Y)
+# dummy_y = np_utils.to_categorical(encoded_Y)
 
 
-# load model
-json_file = open(
-    'C:/Users\medo\Desktop\Arabic-OCR\Code\code\model.json', 'r')
-loaded_model_json = json_file.read()
-json_file.close()
-loaded_model = model_from_json(loaded_model_json)
-# load weights into new model
-loaded_model.load_weights(
-    "C:/Users\medo\Desktop\Arabic-OCR\Code\code\model.h5")
-print("Loaded model from disk")
-loaded_model.compile(loss='categorical_crossentropy',
-                     optimizer='adam', metrics=['accuracy'])
+# # load model
+# json_file = open(
+#     'C:/Users\medo\Desktop\Arabic-OCR\Code\code\model.json', 'r')
+# loaded_model_json = json_file.read()
+# json_file.close()
+# loaded_model = model_from_json(loaded_model_json)
+# # load weights into new model
+# loaded_model.load_weights(
+#     "C:/Users\medo\Desktop\Arabic-OCR\Code\code\model.h5")
+# print("Loaded model from disk")
+# loaded_model.compile(loss='categorical_crossentropy',
+#                      optimizer='adam', metrics=['accuracy'])
 
 
 print(len(input_imgs))
 # time here
 for i in range(len(input_imgs)):
-    out = open('C:/Users\medo\Desktop\Arabic-OCR\Code\output\\test_' + str(i+1)+'.txt',
-               'w+', encoding='utf-8')
+    #out = open('C:/Users\medo\Desktop\Arabic-OCR\Code\output\\test_' + str(i+1)+'.txt', 'w+', encoding='utf-8')
     img = skew_correction(input_imgs[i])
     lines, lines_dil = LineSegmentor(img).segment_lines()
     words, length = WordSegmentor(lines, lines_dil).segment_words()
     # array of arrays eac array contains chars imgs of word
-    lt_img = segment_paragragh(lines, words)
-    for i, word in enumerate(lt_img):
-        for j, letter in enumerate(word):
-            letter = pad(letter)
-            #gray = PreProcess(letter, 1)
+    lt_img = segment_chars(lines, words)
+    cnt = 0
+    for el in lt_img:
+        for ell in el:
+            cv2.imwrite('t%d.png'%cnt, ell)
+            cnt += 1
+    # for i, word in enumerate(lt_img):
+    #     for j, letter in enumerate(word):
+    #         letter = pad(letter)
+    #         #gray = PreProcess(letter, 1)
 
-            features = np.array(dct(letter).flatten()).reshape(1, 2500)
-            res = loaded_model.predict(features)
-            inverted = encoder.inverse_transform([argmax(res[0])])
-            print(final_labels[inverted[0]])
-            out.write(final_labels[inverted[0]])
-        out.write(' ')
+    #         features = np.array(dct(letter).flatten()).reshape(1, 2500)
+    #         res = loaded_model.predict(features)
+    #         inverted = encoder.inverse_transform([argmax(res[0])])
+    #         print(final_labels[inverted[0]])
+    #         out.write(final_labels[inverted[0]])
+    #     out.write(' ')
