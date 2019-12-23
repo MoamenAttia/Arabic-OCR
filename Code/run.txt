@@ -1,1 +1,1 @@
-python edit_distance.p C:\Users\medo\Desktop\Arabic-OCR\Code\output\text C:\Users\medo\Desktop\Arabic-OCR\Code\test
+python edit_distance.py C:\Users\medo\Desktop\Arabic-OCR\Code\output\text C:\Users\medo\Desktop\Arabic-OCR\Code\test
