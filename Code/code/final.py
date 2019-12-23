@@ -27,7 +27,6 @@ from keras.layers import Dense
 from CharSegmentor import segment_chars
 from LineSegmentor import LineSegmentor
 from WordSegmentor import WordSegmentor
-from Line_segmentation import segment_paragragh
 import time
 import cv2
 import numpy as np
@@ -157,8 +156,9 @@ out_time = open(directory, 'w+', encoding='utf-8')
 
 # time here
 for i in range(len(input_imgs)):
-    out = open('C:/Users\medo\Desktop\Arabic-OCR\Code\output\\test_' +
+    out = open('C:/Users\medo\Desktop\Arabic-OCR\Code\output\\text\\test_' +
                str(i+1)+'.txt', 'w+', encoding='utf-8')
+    print('test_' + str(i+1))
     final_output = []
     seconds1 = time.time()
     img = skew_correction(input_imgs[i])
