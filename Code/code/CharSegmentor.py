@@ -374,6 +374,26 @@ def __cropping_indeces(hp, bl):
         i += 1
     return start, end
 
+def __detect_baseline(hp):
+    return np.argmax(hp)
+
+def __detect_maximum_transition(img, bl):
+    maxTransition = 0
+    mti = bl
+    for i in range(bl, 0, -1):
+        currentTransition = 0
+        flag = 0
+        for j in range(img.shape[1]):
+            if img[i,j] == 255 and flag == 0:
+                currentTransition += 1
+                flag = 1
+            elif img[i,j] != 255 and flag == 1:
+                flag = 0
+        if currentTransition >= maxTransition:
+            maxTransition = currentTransition
+            mti = i
+    return mti
+
 def __process_line(line):
     line = cv2.resize(line, (int(line.shape[1]*220/100), int(line.shape[0]*220/100)), interpolation=cv2.INTER_AREA)
     kernel = np.ones((2, 2), np.uint8)
@@ -406,27 +426,6 @@ def __process_line(line):
     
     return bl_line, maxTransitionIndex_line, bw_line, max_indeces_list[1]
 
-
-def __detect_baseline(hp):
-    return np.argmax(hp)
-
-def __detect_maximum_transition(img, bl):
-    maxTransition = 0
-    mti = bl
-    for i in range(bl, 0, -1):
-        currentTransition = 0
-        flag = 0
-        for j in range(img.shape[1]):
-            if img[i,j] == 255 and flag == 0:
-                currentTransition += 1
-                flag = 1
-            elif img[i,j] != 255 and flag == 1:
-                flag = 0
-        if currentTransition >= maxTransition:
-            maxTransition = currentTransition
-            mti = i
-    return mti
-
 def __cut_word(img, valid_cutting_points):
     chars = []
     for i in range(len(valid_cutting_points) - 1):
@@ -458,7 +457,7 @@ def __process_word(img, line, bl_line, maxTransitionIndex_line, bw_line, second_
 
     vp_word = np.sum(bw_img, axis=0)
     vp_line = np.sum(bw_line, axis=0)
-    second_mfv, mfv, cutting_points = __cutting_points_identification(vp_line, bw_img, maxTransitionIndex, bl_line) # vp_word
+    second_mfv, mfv, cutting_points = __cutting_points_identification(vp_word, bw_img, maxTransitionIndex, bl_line)
 
     valid_sr = __filter_separation_region(skeleton, bw_img, cutting_points, bl_line, maxTransitionIndex, mfv, second_mfv, vp_word, __horizintal_projection(bw_line), second_peak)
    
