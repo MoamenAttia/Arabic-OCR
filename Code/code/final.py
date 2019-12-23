@@ -1,45 +1,44 @@
+from padding import pad
+from tempfile import TemporaryFile
+from sklearn.preprocessing import OneHotEncoder
+from numpy import argmax
+from numpy import array
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+from keras.utils import np_utils
+from keras.wrappers.scikit_learn import KerasClassifier
+import pandas
+from numpy import loadtxt
+from sklearn import preprocessing
+import imutils
+from sklearn.preprocessing import StandardScaler
+from pyefd import elliptic_fourier_descriptors
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+import pandas as pd
+from math import copysign, log10
+from keras.models import model_from_json
+from keras.models import Sequential
+from keras.layers import Dense
+from CharSegmentor import segment_chars
+from LineSegmentor import LineSegmentor
+from WordSegmentor import WordSegmentor
+from Line_segmentation import segment_paragragh
+import time
 import cv2
 import numpy as np
 import os
 import glob
 import re
-import time
-from Line_segmentation import segment_paragragh
-from WordSegmentor import WordSegmentor
-from LineSegmentor import LineSegmentor
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.models import model_from_json
-from math import copysign, log10
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score
-from sklearn.naive_bayes import GaussianNB
-from pyefd import elliptic_fourier_descriptors
-from sklearn.preprocessing import StandardScaler
-import imutils
-from sklearn import preprocessing
-from numpy import loadtxt
-from keras.models import Sequential
-from keras.layers import Dense
-import pandas
-from keras.wrappers.scikit_learn import KerasClassifier
-from keras.utils import np_utils
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import Pipeline
-from numpy import array
-from numpy import argmax
-from sklearn.preprocessing import OneHotEncoder
-from keras.models import model_from_json
-from tempfile import TemporaryFile
-from padding import pad
 
 
 input_path = 'C:/Users\medo\Desktop\Arabic-OCR\Code\input'
 output_path = 'C:/Users\medo\Desktop\Arabic-OCR\Code\output\\'
+
 
 numbers = re.compile(r'(\d+)')
 
@@ -124,6 +123,7 @@ final_labels = {'alif': 'ا', 'baa': 'ب', 'taa': 'ت',
 
 
 # load labels
+
 Y = np.genfromtxt(
     'C:/Users\medo\Desktop\Arabic-OCR\Code\code\labels.txt', dtype='str')
 encoder = LabelEncoder()
@@ -157,15 +157,15 @@ out_time = open(directory, 'w+', encoding='utf-8')
 
 # time here
 for i in range(len(input_imgs)):
-    out = open('C:/Users\medo\Desktop\Arabic-OCR\Code\output\\text\\test_' + str(i+1)+'.txt',
-               'w+', encoding='utf-8')
+    out = open('C:/Users\medo\Desktop\Arabic-OCR\Code\output\\test_' +
+               str(i+1)+'.txt', 'w+', encoding='utf-8')
     final_output = []
     seconds1 = time.time()
     img = skew_correction(input_imgs[i])
     lines, lines_dil = LineSegmentor(img).segment_lines()
     words, length = WordSegmentor(lines, lines_dil).segment_words()
-    # array of arrays each array contains chars imgs of word
-    lt_img = segment_paragragh(lines, words)
+    # array of arrays eac array contains chars imgs of word
+    lt_img = segment_chars(lines, words)
     for i, word in enumerate(lt_img):
         for j, letter in enumerate(word):
             letter = pad(letter)
